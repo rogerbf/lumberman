@@ -2,7 +2,7 @@ import test from 'tape'
 import lumberman from '../index'
 import { Readable, Transform } from 'stream'
 
-const createTestStream = data => {
+const createTestStream = (data, objectMode = false) => {
   return Object.assign(
     new Readable({
       read () {
@@ -11,7 +11,8 @@ const createTestStream = data => {
         } else {
           this.push(null)
         }
-      }
+      },
+      objectMode
     }),
     { data: [ ...data ] }
   )
@@ -28,6 +29,11 @@ const sampleData = {
   B: [
     `newline\nseparated\nwords`,
     `with\nno\nspaces`
+  ],
+  C: [
+    { type: `warning`, message: `something went wrong` },
+    { type: `notice`, message: `connecting` },
+    { type: `warning`, message: `connection failed` }
   ]
 }
 
@@ -68,6 +74,7 @@ test(`throws with no source stream`, assert => {
 test(`expected output with defaults`, assert => {
   const source = createTestStream(sampleData.B)
   const log = lumberman({ source })
+
   const expected = {
     eventCount: 2,
     data: [ `newline\nseparated\nwords`, `with\nno\nspaces` ]
@@ -93,6 +100,7 @@ test(`expected output with defaults`, assert => {
 test(`expected output with custom transform`, assert => {
   const source = createTestStream(sampleData.B)
   const log = lumberman({ source, transforms: [ removeChar(`\n`) ] })
+
   const expected = {
     eventCount: 2,
     data: [ `newlineseparatedwords`, `withnospaces` ]
@@ -121,6 +129,7 @@ test(`expected output with multiple custom transforms`, assert => {
     source,
     transforms: [ removeChar(`\n`), capitalize() ]
   })
+
   const expected = {
     eventCount: 2,
     data: [ `NEWLINESEPARATEDWORDS`, `WITHNOSPACES` ]
@@ -133,6 +142,78 @@ test(`expected output with multiple custom transforms`, assert => {
 
   log.on(`data`, data => {
     actual.data = [ ...actual.data, data.toString() ]
+    actual.eventCount = actual.eventCount + 1
+  })
+
+  log.on(`end`, () => {
+    assert.equal(actual.eventCount, expected.eventCount)
+    assert.deepEqual(actual.data, expected.data)
+    assert.end()
+  })
+})
+
+test(`expected output with filters`, assert => {
+  const source = createTestStream(sampleData.A)
+  const log = lumberman({
+    source,
+    filters: [
+      {
+        eventName: `warn`,
+        test: /\[warn]/g
+      }
+    ]
+  })
+
+  const expected = {
+    eventCount: 1,
+    data: [ `Nov 23 11:27:43.446 [warn] Warning from libevent: kq_init: detected broken kqueue; not using.: Invalid argument\n` ]
+  }
+
+  const actual = {
+    eventCount: 0,
+    data: []
+  }
+
+  log.on(`warn`, data => {
+    actual.data = [ ...actual.data, data.toString() ]
+    actual.eventCount = actual.eventCount + 1
+  })
+
+  log.on(`end`, () => {
+    assert.equal(actual.eventCount, expected.eventCount)
+    assert.deepEqual(actual.data, expected.data)
+    assert.end()
+  })
+})
+
+test(`expected output with filters (objects)`, assert => {
+  const source = createTestStream(sampleData.C, true)
+
+  const log = lumberman({
+    source,
+    filters: [
+      {
+        eventName: `warning`,
+        test: data => data.type === `warning`
+      }
+    ]
+  })
+
+  const expected = {
+    eventCount: 2,
+    data: [
+      { type: `warning`, message: `something went wrong` },
+      { type: `warning`, message: `connection failed` }
+    ]
+  }
+
+  const actual = {
+    eventCount: 0,
+    data: []
+  }
+
+  log.on(`warning`, data => {
+    actual.data = [ ...actual.data, data ]
     actual.eventCount = actual.eventCount + 1
   })
 
