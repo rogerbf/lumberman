@@ -66,6 +66,11 @@ test(`returns a readable stream`, assert => {
   assert.end()
 })
 
+test(`throws with no argument`, assert => {
+  assert.throws(lumberman.bind(null))
+  assert.end()
+})
+
 test(`throws with no source stream`, assert => {
   assert.throws(lumberman.bind(null, {}))
   assert.end()
