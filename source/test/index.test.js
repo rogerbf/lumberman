@@ -156,10 +156,10 @@ test(`expected output with filters`, assert => {
   const source = createTestStream(sampleData.A)
   const log = lumberman({
     source,
-    filters: [
+    dispatch: [
       {
         eventName: `warn`,
-        test: /\[warn]/g
+        when: /\[warn]/g
       }
     ]
   })
@@ -191,10 +191,10 @@ test(`expected output with filters (objects)`, assert => {
 
   const log = lumberman({
     source,
-    filters: [
+    dispatch: [
       {
         eventName: `warning`,
-        test: data => data.type === `warning`
+        when: data => data.type === `warning`
       }
     ]
   })
