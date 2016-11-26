@@ -195,31 +195,53 @@ test(`expected output with filters (objects)`, assert => {
       {
         eventName: `warning`,
         when: data => data.type === `warning`
+      },
+      {
+        eventName: `notice`,
+        when: data => data.type === `notice`
       }
     ]
   })
 
+  assert.equal(log._readableState.objectMode, true)
+
   const expected = {
-    eventCount: 2,
-    data: [
-      { type: `warning`, message: `something went wrong` },
-      { type: `warning`, message: `connection failed` }
-    ]
+    warning: {
+      eventCount: 2,
+      data: [
+        { type: `warning`, message: `something went wrong` },
+        { type: `warning`, message: `connection failed` }
+      ]
+    },
+    notice: {
+      eventCount: 1,
+      data: [ { type: `notice`, message: `connecting` } ]
+    }
   }
 
   const actual = {
-    eventCount: 0,
-    data: []
+    warning: {
+      eventCount: 0,
+      data: []
+    },
+    notice: {
+      eventCount: 0,
+      data: []
+    }
   }
 
   log.on(`warning`, data => {
-    actual.data = [ ...actual.data, data ]
-    actual.eventCount = actual.eventCount + 1
+    actual.warning.data = [ ...actual.warning.data, data ]
+    actual.warning.eventCount = actual.warning.eventCount + 1
+  })
+
+  log.on(`notice`, data => {
+    actual.notice.data = [ ...actual.notice.data, data ]
+    actual.notice.eventCount = actual.notice.eventCount + 1
   })
 
   log.on(`end`, () => {
-    assert.equal(actual.eventCount, expected.eventCount)
-    assert.deepEqual(actual.data, expected.data)
+    assert.deepEqual(actual, expected)
     assert.end()
   })
 })
