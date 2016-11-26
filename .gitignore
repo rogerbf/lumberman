@@ -1,0 +1,9 @@
+node_modules
+distribution
+.DS_Store
+package
+lumberman*.tgz
+npm-debug.log
+.nyc_output
+coverage
+NOTES
