@@ -104,7 +104,7 @@ test(`expected output with defaults`, assert => {
 
 test(`expected output with custom transform`, assert => {
   const source = createTestStream(sampleData.B)
-  const log = lumberman({ source, transforms: [ removeChar(`\n`) ] })
+  const log = lumberman({ source, transform: [ removeChar(`\n`) ] })
 
   const expected = {
     eventCount: 2,
@@ -132,7 +132,7 @@ test(`expected output with multiple custom transforms`, assert => {
   const source = createTestStream(sampleData.B)
   const log = lumberman({
     source,
-    transforms: [ removeChar(`\n`), capitalize() ]
+    transform: [ removeChar(`\n`), capitalize() ]
   })
 
   const expected = {

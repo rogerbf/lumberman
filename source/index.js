@@ -1,8 +1,8 @@
 import { Transform } from 'stream'
 
-export default ({ source, transforms, dispatch }) => {
+export default ({ source, transform, dispatch }) => {
   if (!source) { throw new Error(`missing source stream`) }
-  if (!transforms) { transforms = [] }
+  if (!transform) { transform = [] }
 
   const lumberman = new Transform({
     transform (chunk, encoding, next) {
@@ -28,7 +28,7 @@ export default ({ source, transforms, dispatch }) => {
     })
   }
 
-  return transforms
+  return transform
     .reduce((stream, transformStream) => stream.pipe(transformStream), source)
     .pipe(lumberman)
 }
