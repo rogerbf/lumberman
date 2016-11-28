@@ -1,6 +1,6 @@
 # lumberman
 
-Filter a stream data into events.
+Filter stream data into events.
 
 ## usage
 ```javascript
