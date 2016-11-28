@@ -1,7 +1,7 @@
 {
   "name": "lumberman",
   "version": "0.0.1",
-  "description": "",
+  "description": "filter a stream data into events",
   "main": "./distribution/index.js",
   "scripts": {
     "test": "tape -r babel-register ./source/**/*.test.js | tap-dot",
@@ -18,7 +18,15 @@
     "test:coverage": "nyc --reporter=lcov --require babel-register npm test && nyc report",
     "watch:test:coverage": "onchange \"source/*.js\" \"source/**/*.js\" -- npm run test:coverage"
   },
-  "keywords": [],
+  "keywords": [
+    "events",
+    "eventemitter",
+    "stream",
+    "filter",
+    "loggging",
+    "logs",
+    "log"
+  ],
   "author": "rogerbf <roger@bergfalk.nu> (http://bergfalk.nu/)",
   "license": "MIT",
   "devDependencies": {
@@ -42,5 +50,13 @@
     "distribution",
     "README.md"
   ],
-  "dependencies": {}
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rogerbf/lumberman.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rogerbf/lumberman/issues"
+  },
+  "homepage": "https://github.com/rogerbf/lumberman#readme"
 }

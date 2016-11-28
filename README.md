@@ -1,5 +1,7 @@
 # lumberman
 
+Filter a stream data into events.
+
 ## usage
 ```javascript
 import lumberman from 'lumberman'
@@ -8,9 +10,9 @@ import split from 'buffer-split-transform'
 const log = lumberman({
   source: child.stdout,
   transform: [ split() ],
-  dispatch: [
-    { when: /\[complete]/g, eventName: `complete` },
-    { when: /\[warning]/g, eventName: `warning` }
+  emit: [
+    { eventName: `complete`, filter: /\[complete]/g },
+    { eventName: `warning`, filter: /\[warning]/g }
   ]
 })
 
