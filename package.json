@@ -1,7 +1,7 @@
 {
   "name": "lumberman",
   "version": "0.0.1",
-  "description": "filter a stream data into events",
+  "description": "filter stream data into separate events",
   "main": "./distribution/index.js",
   "scripts": {
     "test": "tape -r babel-register ./source/**/*.test.js | tap-dot",
