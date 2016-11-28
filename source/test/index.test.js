@@ -46,6 +46,20 @@ const capitalize = () => {
   })
 }
 
+const appendDataToWarning = (data) => {
+  return new Transform({
+    transform (obj, encoding, next) {
+      if (obj.type === `warning`) {
+        this.push({ ...obj, ...data })
+      } else {
+        this.push(obj)
+      }
+      next()
+    },
+    objectMode: true
+  })
+}
+
 const removeChar = char => {
   return new Transform({
     transform (chunk, encoding, next) {
@@ -161,10 +175,10 @@ test(`expected output with filters`, assert => {
   const source = createTestStream(sampleData.A)
   const log = lumberman({
     source,
-    dispatch: [
+    emit: [
       {
         eventName: `warn`,
-        when: /\[warn]/g
+        filter: /\[warn]/g
       }
     ]
   })
@@ -196,14 +210,14 @@ test(`expected output with filters (objects)`, assert => {
 
   const log = lumberman({
     source,
-    dispatch: [
+    emit: [
       {
         eventName: `warning`,
-        when: data => data.type === `warning`
+        filter: data => data.type === `warning`
       },
       {
         eventName: `notice`,
-        when: data => data.type === `notice`
+        filter: data => data.type === `notice`
       }
     ]
   })
@@ -216,6 +230,67 @@ test(`expected output with filters (objects)`, assert => {
       data: [
         { type: `warning`, message: `something went wrong` },
         { type: `warning`, message: `connection failed` }
+      ]
+    },
+    notice: {
+      eventCount: 1,
+      data: [ { type: `notice`, message: `connecting` } ]
+    }
+  }
+
+  const actual = {
+    warning: {
+      eventCount: 0,
+      data: []
+    },
+    notice: {
+      eventCount: 0,
+      data: []
+    }
+  }
+
+  log.on(`warning`, data => {
+    actual.warning.data = [ ...actual.warning.data, data ]
+    actual.warning.eventCount = actual.warning.eventCount + 1
+  })
+
+  log.on(`notice`, data => {
+    actual.notice.data = [ ...actual.notice.data, data ]
+    actual.notice.eventCount = actual.notice.eventCount + 1
+  })
+
+  log.on(`end`, () => {
+    assert.deepEqual(actual, expected)
+    assert.end()
+  })
+})
+
+test(`expected output with filters (objects) and transform`, assert => {
+  const source = createTestStream(sampleData.C, true)
+
+  const log = lumberman({
+    source,
+    transform: [ appendDataToWarning({ hello: `test` }) ],
+    emit: [
+      {
+        eventName: `warning`,
+        filter: data => data.type === `warning`
+      },
+      {
+        eventName: `notice`,
+        filter: data => data.type === `notice`
+      }
+    ]
+  })
+
+  assert.equal(log._readableState.objectMode, true)
+
+  const expected = {
+    warning: {
+      eventCount: 2,
+      data: [
+        { type: `warning`, message: `something went wrong`, hello: `test` },
+        { type: `warning`, message: `connection failed`, hello: `test` }
       ]
     },
     notice: {

@@ -1,6 +1,6 @@
 import { Transform } from 'stream'
 
-export default ({ source, transform, dispatch }) => {
+export default ({ source, transform, emit }) => {
   if (!source) { throw new Error(`missing source stream`) }
   if (!transform) { transform = [] }
 
@@ -12,16 +12,16 @@ export default ({ source, transform, dispatch }) => {
     objectMode: source._readableState.objectMode
   })
 
-  if (dispatch) {
+  if (emit) {
     lumberman.on(`data`, data => {
-      dispatch.map(dispatch => {
-        if (dispatch.when.test) {
-          if (dispatch.when.test(data)) {
-            lumberman.emit(dispatch.eventName, data)
+      emit.map(emit => {
+        if (emit.filter.test) {
+          if (emit.filter.test(data)) {
+            lumberman.emit(emit.eventName, data)
           }
         } else {
-          if (dispatch.when(data)) {
-            lumberman.emit(dispatch.eventName, data)
+          if (emit.filter(data)) {
+            lumberman.emit(emit.eventName, data)
           }
         }
       })
