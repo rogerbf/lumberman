@@ -69,6 +69,16 @@ const removeChar = char => {
   })
 }
 
+const convertToObject = () => {
+  return new Transform({
+    transform (chunk, encoding, next) {
+      this.push({ data: chunk.toString() })
+      next()
+    },
+    objectMode: true
+  })
+}
+
 test(`lumberman exports a function`, assert => {
   assert.equal(typeof (lumberman), `function`)
   assert.end()
@@ -318,6 +328,37 @@ test(`expected output with filters (objects) and transform`, assert => {
   log.on(`notice`, data => {
     actual.notice.data = [ ...actual.notice.data, data ]
     actual.notice.eventCount = actual.notice.eventCount + 1
+  })
+
+  log.on(`end`, () => {
+    assert.deepEqual(actual, expected)
+    assert.end()
+  })
+})
+
+test(`switch to objectMode with transform`, assert => {
+  const source = createTestStream(sampleData.B)
+  const log = lumberman({
+    source,
+    transform: [ capitalize(), convertToObject() ]
+  })
+
+  const expected = {
+    eventCount: 2,
+    data: [
+      { data: `NEWLINE\nSEPARATED\nWORDS` },
+      { data: `WITH\nNO\nSPACES` }
+    ]
+  }
+
+  const actual = {
+    eventCount: 0,
+    data: []
+  }
+
+  log.on(`data`, data => {
+    actual.eventCount = actual.eventCount + 1
+    actual.data.push(data)
   })
 
   log.on(`end`, () => {
