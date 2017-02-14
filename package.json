@@ -1,6 +1,6 @@
 {
   "name": "lumberman",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "filter stream data into separate events",
   "main": "./distribution/index.js",
   "scripts": {
@@ -50,7 +50,9 @@
     "distribution",
     "README.md"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "readable-stream": "^2.2.2"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rogerbf/lumberman.git"

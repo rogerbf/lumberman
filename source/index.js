@@ -1,4 +1,4 @@
-import { Transform } from 'stream'
+import { Transform } from 'readable-stream'
 
 export default ({ source, transform, emit }) => {
   if (!source) { throw new Error(`missing source stream`) }
